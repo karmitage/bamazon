@@ -37,56 +37,77 @@ function displayProducts() {
                 res[i].price
             );
         }
+        buyProduct();
         // connection.end();
     });
 }
 
 
-// function rangeSearch() {
-//     inquirer
-//         .prompt([
-//             {
-//                 name: "id",
-//                 type: "input",
-//                 message: "Enter the id of the product you'd like to buy: ",
-//                 validate: function (value) {
-//                     if (isNaN(value) === false) {
-//                         return true;
-//                     }
-//                     return false;
-//                 }
-//             },
-//             {
-//                 name: "Quantity",
-//                 type: "input",
-//                 message: "Enter the quantity you wish to purchase: ",
-//                 validate: function (value) {
-//                     if (isNaN(value) === false) {
-//                         return true;
-//                     }
-//                     return false;
-//                 }
-//             }
-//         ])
-//         .then(function (answer) {
-//             var query = "SELECT position,song,artist,year FROM top5000 WHERE position BETWEEN ? AND ?";
-//             connection.query(query, [answer.start, answer.end], function (err, res) {
-//                 if (err) throw err;
-//                 for (var i = 0; i < res.length; i++) {
-//                     console.log(
-//                         "Position: " +
-//                         res[i].position +
-//                         " || Song: " +
-//                         res[i].song +
-//                         " || Artist: " +
-//                         res[i].artist +
-//                         " || Year: " +
-//                         res[i].year
-//                     );
-//                 }
-//                 runSearch();
-//             });
-//         });
-// }
+function buyProduct() {
+    inquirer
+        .prompt([
+            {
+                name: "id",
+                type: "input",
+                message: "Enter the id of the product you'd like to buy: ",
+                validate: function (value) {
+                    if (isNaN(value) === false) {
+                        return true;
+                    }
+                    return false;
+                }
+            },
+            {
+                name: "quantity",
+                type: "input",
+                message: "Enter the quantity you wish to purchase: ",
+                validate: function (value) {
+                    if (isNaN(value) === false) {
+                        return true;
+                    }
+                    return false;
+                }
+            }
+        ])
+        .then(function (answer) {
+            var query = "SELECT item_id, stock_quantity, price FROM products WHERE item_id = " + answer.id;
+            connection.query(query, function (err, res) {
+                if (err) throw err;
+                if (res[0].stock_quantity - answer.quantity < 0) {
+                    console.log("Insufficient Quantity! Please modify your order");
+                    buyProduct();
+                } else {
+                    var originalQty = res[0].stock_quantity;
+                    fulfillOrder(answer.id, answer.quantity, originalQty);
+                    console.log(res);
+                    console.log("answer quantity is: " + answer.quantity);
+                    console.log("price is: " + res[0].price);
+                    console.log("Your total order is: $" + answer.quantity * res[0].price);
+                }
+            });
+        });
+}
 
+
+function fulfillOrder(id, orderQty, originalQty) {
+    var query = connection.query(
+        "UPDATE products SET ? WHERE ?",
+        [
+            {
+                stock_quantity: originalQty - orderQty
+            },
+            {
+                item_id: id
+            }
+        ],
+        function (err, res) {
+            if (err) throw err;
+            console.log(res.affectedRows + " products updated\n");
+        }
+    );
+    // logs the actual query being run
+    console.log(query.sql);
+    connection.end();
+
+}
 
