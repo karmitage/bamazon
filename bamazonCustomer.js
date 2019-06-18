@@ -2,8 +2,6 @@ var mysql = require("mysql");
 var inquirer = require("inquirer");
 require("dotenv").config();
 
-
-
 var connection = mysql.createConnection({
     host: "localhost",
 
@@ -38,7 +36,6 @@ function displayProducts() {
             );
         }
         buyProduct();
-        // connection.end();
     });
 }
 
@@ -73,16 +70,13 @@ function buyProduct() {
             var query = "SELECT item_id, stock_quantity, price FROM products WHERE item_id = " + answer.id;
             connection.query(query, function (err, res) {
                 if (err) throw err;
+                //if the user selected a quantity greater than the stock_quantity value:
                 if (res[0].stock_quantity - answer.quantity < 0) {
                     console.log("Insufficient Quantity! Please modify your order");
                     buyProduct();
                 } else {
                     var originalQty = res[0].stock_quantity;
                     fulfillOrder(answer.id, answer.quantity, originalQty);
-                    console.log(res);
-                    console.log("answer quantity is: " + answer.quantity);
-                    console.log("price is: " + res[0].price);
-                    console.log("Your total order is: $" + answer.quantity * res[0].price);
                 }
             });
         });
@@ -102,11 +96,9 @@ function fulfillOrder(id, orderQty, originalQty) {
         ],
         function (err, res) {
             if (err) throw err;
-            console.log(res.affectedRows + " products updated\n");
+            console.log(res.affectedRows + " product(s) updated\n");
         }
     );
-    // logs the actual query being run
-    console.log(query.sql);
     connection.end();
 
 }
