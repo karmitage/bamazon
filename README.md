@@ -9,4 +9,15 @@
 
 - I used dotenv to store the MySQL password in an environment variable.
 
+## Video demos:
+
+bamazonCustomer:
+
+https://drive.google.com/file/d/1PTib8KER3AdW5varWrZGLGBN6wJAIsFt/view?usp=sharing
+
+bamazonManager:
+
+https://drive.google.com/file/d/1ddO3aNJAEG23Oq2pfqtSjthLByhByXCy/view?usp=sharing
+
+
 
